@@ -1,0 +1,11 @@
+[deps]
+ApproxFun = "28f2ccd6-bb30-5033-b560-165f7b14dc2f"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+EBayes = "bad9efff-1a8e-41fb-9e7d-5d6f530fb0a3"
+ExponentialFamilies = "49aacbaa-bd10-4545-ba27-0a7ca180d7f7"
+Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+MinimaxCalibratedEBayes = "c903c015-ce1d-4e5c-9374-957b0f33d7cc"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Splines2 = "5a560754-308a-11ea-3701-ef72685e98d6"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
