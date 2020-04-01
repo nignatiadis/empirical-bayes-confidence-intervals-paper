@@ -8,10 +8,14 @@ addprocs(2)
 
 scriptloc = srcdir("mceb_sim_eval.jl")
 @eval @everywhere include($scriptloc)
-@everywhere using MosekTools
+
+# @everywhere 
+@everywhere begin
+using MosekTools
+
 
 #--- Global options
-nreps = 5
+nreps = 2
 alpha_level = 0.9
 
 #--- Targets
@@ -36,24 +40,31 @@ gcal = GaussianMixturePriorClass(0.2, -6:0.05:6, Mosek.Optimizer)
 																												 
 mceb_options = MinimaxCalibratorOptions(prior_class = gcal, 
 										marginal_grid =  -6:0.05:6,
-										pilot_options =  MCEB.ButuceaComteOptions())																												 																										 
+										pilot_options =  MCEB.ButuceaComteOptions(),
+										cache_target = true)																			 																										 
 
 
 ebayes_methods = [expfamily_solver;
                   mceb_options]
 				  
+function mceb_sim_eval_closure(i)
+	mceb_sim_eval(i; eb_prior = smoothed_twin_tower,
+	                               n = n,
+								   alpha_level = alpha_level,
+	                               eb_methods = ebayes_methods,
+	                               targets = ebayes_targets)
+end 
+				  
+end 
+
 # start simulations				  
-res = pmap(i->mceb_sim_eval(i; eb_prior = smoothed_twin_tower,
-                               n = n,
-							   alpha_level = alpha_level,
-                               eb_methods = ebayes_methods,
-                               targets = ebayes_targets),
+res = pmap(mceb_sim_eval_closure,
 			  Base.OneTo(nreps);
 			  on_error = x->"error")		
 
 	
 			  
 
-safesave(datadir("sims","quick_check.jld2"), Dict("res"=>res))
+safesave(datadir("sims","quick_check2.jld2"), Dict("res"=>res))
 
 #@eval @load $(datadir("sims","quick_check.jld2"))
