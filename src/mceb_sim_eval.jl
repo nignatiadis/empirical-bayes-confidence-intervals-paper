@@ -1,3 +1,8 @@
+using ApproxFun
+using ExponentialFamilies
+using MinimaxCalibratedEBayes
+const MCEB = MinimaxCalibratedEBayes
+
 function mceb_sim_eval(i; eb_prior = eb_prior,
 	                n = 10_000,
                   alpha_level = 0.9,
@@ -18,13 +23,15 @@ function mceb_sim_eval(i; eb_prior = eb_prior,
        
             res_nt = (target = t, 
                       true_dist = eb_prior,
-											n = n,
+					  n = n,
                       iteration = i,
                       method = method,
                       target_value = true_target, 
                       result_nt..., 
                       lower_ci = ci_nt[1],
-                      upper_ci = ci_nt[2])
+                      upper_ci = ci_nt[2],
+					  host = gethostname(),
+					  procid = myid())
                 
             push!(res_tuples, res_nt)
         end
