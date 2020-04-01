@@ -53,9 +53,6 @@ res = pmap(i->mceb_sim_eval(i; eb_prior = smoothed_twin_tower,
 			  on_error = x->"error")
 			  
 			  
-			  		
-
-	
 			  
 
 safesave(datadir("sims","twintowers.jld2"), Dict("res"=>res))
