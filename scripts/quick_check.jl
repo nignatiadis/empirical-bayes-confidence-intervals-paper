@@ -7,6 +7,8 @@ using ClusterManagers
 addprocs(2)
 
 scriptloc = srcdir("mceb_sim_eval.jl")
+@everywhere using DrWatson
+@everywhere @quickactivate "MCEBPaper"
 @eval @everywhere include($scriptloc)
 
 # @everywhere 
