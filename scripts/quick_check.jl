@@ -4,14 +4,14 @@ using DrWatson
 using Distributed
 using ClusterManagers
 
-#addprocs(2)
+addprocs(2)
 
 scriptloc = srcdir("mceb_sim_eval.jl")
 @eval @everywhere include($scriptloc)
 @everywhere using MosekTools
 
 #--- Global options
-nreps = 2
+nreps = 5
 alpha_level = 0.9
 
 #--- Targets
