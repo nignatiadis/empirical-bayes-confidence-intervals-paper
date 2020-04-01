@@ -128,6 +128,12 @@ git-tree-sha1 = "23d7324164c89638c18f6d7f90d972fa9c4fa9fb"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 version = "0.7.7"
 
+[[ClusterManagers]]
+deps = ["Distributed", "Sockets"]
+git-tree-sha1 = "60a1c6dc3278910716fcf87eb602968fdf72e44d"
+uuid = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+version = "0.3.2"
+
 [[CodecBzip2]]
 deps = ["Bzip2_jll", "Libdl", "TranscodingStreams"]
 git-tree-sha1 = "2fee975d68f9a8b22187ae86e33c0829b30cf231"
@@ -228,9 +234,9 @@ version = "0.20.2"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "5a431d46abf2ef2a4d5d00bd0ae61f651cf854c8"
+git-tree-sha1 = "73eb18320fe3ba58790c8b8f6f89420f0a622773"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.10"
+version = "0.17.11"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -731,7 +737,7 @@ version = "0.12.1"
 
 [[MinimaxCalibratedEBayes]]
 deps = ["ApproxFun", "DiffResults", "Distributions", "EBayes", "Expectations", "ExponentialFamilies", "ForwardDiff", "Interpolations", "JuMP", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MathOptInterface", "Optim", "OrthogonalPolynomialsQuasi", "OscillatoryIntegrals", "Parameters", "Plots", "QuadGK", "RecipesBase", "Reexport", "Roots", "Setfield", "SpecialFunctions", "Splines2", "Statistics", "StatsBase"]
-git-tree-sha1 = "4984f4d0545af572afbc77264c419395ef75a648"
+git-tree-sha1 = "02dc456d752586013830c7fdc0ae524223d81f96"
 repo-rev = "master"
 repo-url = "https://github.com/nignatiadis/MinimaxCalibratedEBayes.jl"
 uuid = "c903c015-ce1d-4e5c-9374-957b0f33d7cc"

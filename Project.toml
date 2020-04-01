@@ -2,7 +2,9 @@ name = "MCEBPaper"
 
 [deps]
 ApproxFun = "28f2ccd6-bb30-5033-b560-165f7b14dc2f"
+ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 EBayes = "bad9efff-1a8e-41fb-9e7d-5d6f530fb0a3"
