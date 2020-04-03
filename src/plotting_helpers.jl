@@ -19,7 +19,7 @@ function prior_string(dist::MixtureModel)
 	end
 end
 
-prior_string(::ContinuousExponentialFamily) = "Smoothed Twin-Towers"
+prior_string(::ContinuousExponentialFamily) = "Logspline Two Towers"
 prior_string(dbn) = string(typeof(dbn))[1:10]
 
 method_string(::ExponentialFamilyDeconvolutionMLE) = "G-model"
@@ -46,7 +46,10 @@ target_string(::MCEB.PosteriorTarget{<:LFSRNumerator}) = "LFSR"
 									  titles = ["a)"; "b)"; "c)"],
 									  gmodel_alpha = 0.5,
 									  gmodel_color =  "#C68642",# "#C2C2B4", #"#550133", 
-									  mceb_color = "#F6CD7F") #"#EBA415")#)
+									  mceb_color = "#F6CD7F",
+									  density_legend = :topright,
+									  density_ylim = nothing,
+									  bands_legend = :bottomright) #"#EBA415")#)
     res_df = first(h.args)
 	mceb_df = res_df |> @filter(_.method_name == method_names[1]) |> Table
 	gmodel_df = res_df |> @filter(_.method_name == method_names[2]) |> Table
@@ -68,9 +71,12 @@ target_string(::MCEB.PosteriorTarget{<:LFSRNumerator}) = "LFSR"
 		if !isnothing(density_xlim)
 			xlim := density_xlim
 		end 
+		if !isnothing(density_ylim)
+			ylim := density_ylim
+		end 
         #xlim := extrema(x_grid)
 		label := prior_name
-		legend := :topright
+		legend --> density_legend
 		color --> "#018AC4"
 		xguide := L"\mu"
 		yguide := L"Density $g(\mu)$"
@@ -105,7 +111,7 @@ target_string(::MCEB.PosteriorTarget{<:LFSRNumerator}) = "LFSR"
 		label := "true target"
 		ylabel --> MCEB.pretty_label(res_df.target[1])
 		linestyle := :dot
-		legend --> :bottomright
+		legend --> bands_legend 
 		color := :black
 		mceb_df.target_location, mceb_df.target_value
 	end

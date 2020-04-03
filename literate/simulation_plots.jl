@@ -58,15 +58,15 @@ end
 bimodal_postmean = res_df |> @filter(_.target_type == "Posterior Mean" &&
                                      _.prior_name == "Bimodal") |> Table
 
-twintower_postmean = res_df |> @filter(_.target_type == "Posterior Mean" &&
-                                       _.prior_name == "Smoothed Twin-Towers") |> Table
+twotower_postmean = res_df |> @filter(_.target_type == "Posterior Mean" &&
+                                       _.prior_name == "Logspline Two Towers") |> Table
 
 
 bimodal_lfsr = res_df |> @filter(_.target_type == "LFSR" &&
 								 _.prior_name == "Bimodal") |> Table
 
-twintower_lfsr = res_df |> @filter(_.target_type == "LFSR" &&
-								   _.prior_name == "Smoothed Twin-Towers") |> Table
+twotower_lfsr = res_df |> @filter(_.target_type == "LFSR" &&
+								   _.prior_name == "Logspline Two Towers") |> Table
 
 
 unimodal_lfsr = res_df |> @filter(_.target_type == "LFSR" && 
@@ -78,27 +78,45 @@ unimodal_postmean = res_df |> @filter(_.target_type == "Posterior Mean" &&
 
       
 
-def_size = (800,240)
-
-pl1 = simulationplot(unimodal_lfsr; size=def_size)
-
-pl_unimodal_postmean = simulationplot(unimodal_postmean; size=def_size)
-
-savefig("pl_unimodal_postmean.svg")
-savefig("pl_unimodal_postmean.pdf")
+def_size = (850,260)
 
 
 
-pl1 = simulationplot(bimodal_postmean; size=def_size)
+pl_bimodal_lfsr = simulationplot(bimodal_lfsr; size=def_size, density_ylim =(0,1.2),
+                                 bands_legend=:topleft);
+savefig(pl_bimodal_lfsr, "pl_bimodal_lfsr.pdf")
 
-pl1 = simulationplot(bimodal_lfsr; size=def_size)
+pl_unimodal_lfsr = simulationplot(unimodal_lfsr; size=def_size, 
+                                  bands_legend=:topleft, density_ylim =(0,1.7),
+								  titles = ["d)"; "e)"; "f)"])
+savefig(pl_unimodal_lfsr, "pl_unimodal_lfsr.pdf")
 
-pl1 = simulationplot(twintower_postmean; density_xlim = (-4,6), size=def_size)
 
-pl1 = simulationplot(twintower_lfsr; density_xlim = (-4,6), def_size)
-					  
-savefig(pl1, "pl1.svg")					  
-savefig(pl1, "pl1.pdf")					  
+pl_twotower_lfsr = simulationplot(twotower_lfsr; size=def_size, density_xlim = (-4,6),
+                                   density_ylim = (0,0.25),
+                                   bands_legend=:topleft, density_legend=:topright);
+
+savefig(pl_twotower_lfsr, "pl_twotower_lfsr.pdf")
+
+
+
+pl_twotower_postmean = simulationplot(twotower_postmean; size=def_size, density_xlim = (-4,6),
+                                   density_ylim = (0,0.25),
+                                   bands_legend=:topleft, density_legend=:topright,
+								   titles = ["g)"; "h)"; "i)"]);
+
+savefig(pl_twotower_postmean, "pl_twotower_postmean.pdf")
+
+
+pl_bimodal_postmean = simulationplot(bimodal_postmean; size=def_size, density_ylim =(0,1.2),
+                                 bands_legend=:topleft);
+savefig(pl_bimodal_postmean, "pl_bimodal_postmean.pdf")
+
+pl_unimodal_postmean = simulationplot(unimodal_postmean; size=def_size, 
+                                  bands_legend=:topleft, density_ylim =(0,1.7),
+								  titles = ["d)"; "e)"; "f)"])
+savefig(pl_unimodal_postmean, "pl_unimodal_postmean.pdf")
+
 
 
 
