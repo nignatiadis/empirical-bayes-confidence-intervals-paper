@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes 1
-#SBATCH --ntasks-per-node 7
-#SBATCH --time 20:00:00
+#SBATCH --ntasks-per-node 9
+#SBATCH --time 10:00:00
 #SBATCH --partition=hns
 
 ml julia/1.3.1

@@ -4,7 +4,7 @@ using DrWatson
 using Distributed
 using ClusterManagers
 
-addprocs(6) 
+addprocs(8) 
 
 
 scriptloc = srcdir("mceb_sim_eval.jl")
@@ -24,7 +24,7 @@ scriptloc = srcdir("mceb_sim_eval.jl")
 
 	#--- Targets------------------------------------------------------------------
 	target_grid = -3:0.25:3
-	ebayes_targets = [PosteriorMean.(StandardNormalSample.(target_grid))]
+	ebayes_targets = PosteriorMean.(StandardNormalSample.(target_grid))
 	#--- Data generation settings-------------------------------------------------
 											
 	n = 10_000
