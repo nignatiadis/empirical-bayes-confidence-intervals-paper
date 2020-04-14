@@ -15,6 +15,6 @@ with plotting.
 * **scripts:** These are the scripts that run the simulations, i.e., they instantiate all simulation 
 parameters, run then Monte Carlo replicates of the experiment and finally save the data. Data is stored in the `data/sims` folder. 
 * **data/sims:** Empty folder. Output from the scripts in `scripts` folder is saved in this directory.
-* **literate:** These files generate the figures and tables in the paper. They can be either standalone or use results from the `data/sim` folder. The `simulation_plots.jl` file generates all simulation figures, `linear_estimation.jl` generates Figures 3-5 and tables 1-3.
+* **literate:** These files generate the figures and tables in the paper. They can be either standalone or use results from the `data/sim` folder. The `simulation_plots.jl` file generates all simulation figures, `linear_estimation.jl` generates Figures 3-5 and tables 1-3 and `data_analysis.jl` generates Figure 9.
 
 
