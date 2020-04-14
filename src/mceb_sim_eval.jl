@@ -3,6 +3,23 @@ using ExponentialFamilies
 using MinimaxCalibratedEBayes
 const MCEB = MinimaxCalibratedEBayes
 
+"""
+	mceb_sim_eval(i; eb_prior = eb_prior,
+	                 n = 10_000,
+                     alpha_level = 0.9,
+                     eb_methods = eb_methods,
+                     targets = targets)
+					 
+## Parameters
+* i: Just an Integer used to distinguish across different Monte Carlo replicates
+* eb_prior: The ground truth prior ``G`` from which data is generated.
+* n: Number of samples 
+* alpha_level: Nominal coverage guarantee for all intervals 
+* eb_methods: An array of all Empirical Bayes methods to be compared.
+* targets: An array of al Empirical Bayes targets for which confidence intervals are to be constructed.					 
+
+
+"""
 function mceb_sim_eval(i; eb_prior = eb_prior,
 	                n = 10_000,
                   alpha_level = 0.9,
