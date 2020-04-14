@@ -1,10 +1,11 @@
 using DrWatson
 @quickactivate "MCEBPaper"
 
-idx = 1#ARGS[1]
+idx = parse(Int64,ARGS[1])
+@show idx
 nreps_per_proc = 50
 
-
+using Distributed
 include(srcdir("mceb_sim_eval.jl"))
 	
 using MosekTools
@@ -48,6 +49,7 @@ ebayes_methods = [expfamily_solver;
 custom_rng = (1 + nreps_per_proc*(idx-1)):(nreps_per_proc*idx)
 
 for i in custom_rng
+        @show "loop_start"
 	@show i
 	res = mceb_sim_eval(i; eb_prior = smoothed_twin_tower,
 				  	 n = n,
