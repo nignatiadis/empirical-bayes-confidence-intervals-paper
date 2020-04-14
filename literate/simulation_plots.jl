@@ -159,3 +159,91 @@ hline!(varying_dof_plot, [0.9],  color = :grey, linestyle = :dash, label="")
 savefig("gmodel_varying_dof.svg")
 savefig("gmodel_varying_dof2.pdf")
 
+
+
+
+#' Finally plot worst case bias etc.
+
+
+bimodal_postmean_mceb = bimodal_postmean |> @filter(_.method_name == "MCEB") |> Table
+bimodal_lfsr_mceb = bimodal_lfsr |> @filter(_.method_name == "MCEB") |> Table
+twotower_postmean_mceb = twotower_postmean |> @filter(_.method_name == "MCEB") |> Table
+twotower_lfsr_mceb = twotower_lfsr |> @filter(_.method_name == "MCEB") |> Table
+unimodal_lfsr_mceb = unimodal_lfsr |> @filter(_.method_name == "MCEB") |> Table
+unimodal_postmean_mceb = unimodal_postmean |> @filter(_.method_name == "MCEB") |> Table
+
+ 
+
+
+function plot_bias_std(data, legend=:topleft)
+	dbn_name = data.prior_name[1]
+	@show target_name = MCEB.pretty_label(data.target[1])[5:end]
+	tmp_title = dbn_name*","*target_name
+	xs = data.target_location
+	std_error = data.realized_std
+	bias = abs.(data.realized_bias)
+	max_bias = abs.(data.estimated_bias)
+	rmse = sqrt.(bias.^2 + std_error.^2)
+	max_rmse = sqrt.(max_bias.^2 + std_error.^2)
+	ci_width = data.ci_width
+	tmp_plot = plot(xs, rmse, fg_legend=:transparent,
+	                bg_legend=:transparent, legend=legend,
+					linewidth=2, label="Std. error", linestyle=:solid, 
+	                color=RGB(68/255, 69/255, 145/255), title=tmp_title)
+	plot!(tmp_plot, xs, rmse, linewidth=2, label="|Bias|", linestyle=:dash, color= RGB(205/255, 84/255, 150/255))
+	plot!(tmp_plot, xs, ci_width,linewidth=2, label="Max. Bias", linestyle=:dot, color=RGB(132/255, 193/255, 216/255))
+	tmp_plot
+end
+
+function plot_bias_std(data, legend, )
+	dbn_name = data.prior_name[1]
+	target_name = MCEB.pretty_label(data.target[1])
+	tmp_title = dbn_name
+	xs = data.target_location
+	std_error = data.realized_std
+	bias = abs.(data.realized_bias)
+	max_bias = abs.(data.estimated_bias)
+	rmse = sqrt.(bias.^2 + std_error.^2)
+	max_rmse = sqrt.(max_bias.^2 + std_error.^2)
+	ci_width = data.ci_width./2
+	tmp_plot = plot(xs, rmse, ylim=(0,0.4), xlabel=L"x", ylabel=target_name, fg_legend=:transparent, 
+	                bg_legend=:transparent, legend=legend,
+					linewidth=2, label="RMSE", linestyle=:solid, 
+	                color=RGB(68/255, 69/255, 145/255), title=tmp_title)
+	plot!(tmp_plot, xs, max_rmse, linewidth=2, label="Max. RMSE", linestyle=:dash, color= RGB(205/255, 84/255, 150/255))
+	plot!(tmp_plot, xs, ci_width,linewidth=2, label="Half CI width", linestyle=:dot, color=RGB(132/255, 193/255, 216/255))
+	tmp_plot
+end
+
+legends = [:topleft, nothing, nothing, nothing, nothing, nothing]
+
+all_plots = plot_bias_std.([bimodal_postmean_mceb,
+                  unimodal_postmean_mceb,
+				  twotower_postmean_mceb,
+				  bimodal_lfsr_mceb, 
+				  unimodal_lfsr_mceb,
+				  twotower_lfsr_mceb],  legends)
+		
+
+def_size = (900,440)
+		
+				  
+plot(all_plots..., layout=(2,3),size=def_size)				  
+savefig("rmse_ciwidth_plots.pdf")			  
+plot_bias_std(unimodal_lfsr_mceb)
+ 
+plot(xs, bimodal_lfsr_mceb.realized_std, label="std")
+plot(xs, abs.(bimodal_lfsr_mceb.realized_bias), label="std")
+
+plot(xs, bimodal_postmean_mceb.realized_std, label="std")
+plot(xs, abs.(bimodal_postmean_mceb.realized_bias), label="std")
+
+
+
+
+twotower_lfsr 
+
+
+								  #
+unimodal_postmean 
+      
