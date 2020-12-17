@@ -63,7 +63,8 @@ lam_kde_locmix = Empirikos.LocalizedAffineMinimax(neighborhood = (@set infty_nbh
 
 ts= -3:0.2:3
 
-targets = Empirikos.PosteriorMean.(StandardNormalSample.(ts))
+targets = Empirikos.PosteriorProbability.(StandardNormalSample.(ts), Interval(0,nothing))
+
 
 
 # Posterior Mean
@@ -92,4 +93,4 @@ Threads.@threads for i in Base.OneTo(nreps)
 end
 
 
-JLD2.@save "spiky_postmean.jld2" ci_list
+JLD2.@save "spiky_lfsr.jld2" ci_list
