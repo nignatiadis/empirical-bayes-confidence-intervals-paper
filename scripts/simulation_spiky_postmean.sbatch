@@ -2,7 +2,7 @@
 
 #SBATCH --nodes=1
 #SBATCH --time=34:00:00
-#SBATCH --ntasks-per-node=14
+#SBATCH --ntasks-per-node=15
 #SBATCH --output=spiky_postmean.log
 #SBATCH --partition=stat,hns,normal
 
@@ -10,4 +10,4 @@
 ml load julia/1.5.1
 
 # execute script
-julia -t 14 simulation_spiky_postmean.jl
+julia -t 15 simulation_ebci.jl postmean spiky
