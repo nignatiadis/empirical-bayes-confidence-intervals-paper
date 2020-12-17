@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate(".")
+
 using Empirikos
 
 using MosekTools
