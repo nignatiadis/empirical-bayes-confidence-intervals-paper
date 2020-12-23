@@ -28,13 +28,6 @@ end
 
 n = 5_000
 
-#xs = -4:0.01:4
-
-#plot(xs, pdf.(prior,xs), frame=:box,
-#        grid=nothing, color=:purple,
-#         xguide=L"\mu",yguide=L"g(\mu)",thickness_scaling=2, label=nothing)
-
-
 marginal = marginalize(StandardNormalSample(), prior)
 
 
@@ -48,7 +41,10 @@ gcal_locmix = MixturePriorClass(Normal.(-4:0.075:4, 0.25))
 discr = Empirikos.Discretizer(a_min:0.01:a_max)
 
 dkw_nbhood = DvoretzkyKieferWolfowitz(0.05)
-infty_nbhood = Empirikos.InfinityNormDensityBand(a_min=a_min,a_max=a_max);
+infty_nbhood = Empirikos.InfinityNormDensityBand(a_min=a_min, a_max=a_max);
+
+
+
 
 
 
@@ -76,6 +72,7 @@ lam_kde_locmix = Empirikos.LocalizedAffineMinimax(neighborhood = (@set infty_nbh
 
 
 ef = ExponentialFamily(basemeasure = Uniform(-4.0,4.0), df = 5)
+
 ef_method = SpecialExponentialFamilies.PenalizedMLE(ef=ef; c0=0.001)
 
 
@@ -90,7 +87,7 @@ else
 end
 
 # Posterior Mean
-nreps = 400
+nreps = 4
 ci_list = Vector{Any}(undef, nreps)
 
 rnglock = ReentrantLock()
