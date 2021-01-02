@@ -87,7 +87,7 @@ else
 end
 
 # Posterior Mean
-nreps = 4
+nreps = 400
 ci_list = Vector{Any}(undef, nreps)
 
 rnglock = ReentrantLock()
