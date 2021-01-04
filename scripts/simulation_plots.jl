@@ -28,27 +28,59 @@ theme(
     grid = nothing,
     frame = :box,
     thickness_scaling = 1.3,
-    size=(420,330)
+    size = (420, 330),
 )
+
+
 
 
 spiky_prior = Empirikos.AshPriors[:Spiky]
 negspiky_prior = MixtureModel([Normal(-0.25, 0.25), Normal(0, 1.0)], [0.8, 0.2])
 
 tts = -4:0.01:4
-prior_densities_plot = plot(tts, pdf.(spiky_prior, tts), color=:purple, linealpha=0.8,
-             label="Spiky",  linestyle=:solid, legend=:topright,
-             xlabel=L"\mu", ylabel=L"dG(\mu)/d\lambda^{\textrm{Leb}}",
-             size=(380,280))
-plot!(prior_densities_plot, tts, pdf.(negspiky_prior, tts), color=:darkblue, linealpha=0.6,
-             label="NegSpiky", linestyle=:dash)
+prior_densities_plot = plot(
+    tts,
+    pdf.(spiky_prior, tts),
+    color = :purple,
+    linealpha = 0.8,
+    label = "Spiky",
+    linestyle = :solid,
+    legend = :topright,
+    xlabel = L"\mu",
+    ylabel = L"dG(\mu)/d\lambda^{\textrm{Leb}}",
+    size = (380, 280),
+)
+plot!(
+    prior_densities_plot,
+    tts,
+    pdf.(negspiky_prior, tts),
+    color = :darkblue,
+    linealpha = 0.6,
+    label = "NegSpiky",
+    linestyle = :dash,
+)
 
-marginal_densities_plot = plot(tts, pdf.(spiky_prior, StandardNormalSample.(tts)), color=:purple, linealpha=0.8,
-             label="Spiky",  linestyle=:solid, legend=:topright,
-             xlabel=L"z", ylabel=L"f_G(z)",
-             size=(380,280))
-plot!(marginal_densities_plot, tts, pdf.(negspiky_prior, StandardNormalSample.(tts)), color=:darkblue, linealpha=0.6,
-             label="NegSpiky", linestyle=:dash)
+marginal_densities_plot = plot(
+    tts,
+    pdf.(spiky_prior, StandardNormalSample.(tts)),
+    color = :purple,
+    linealpha = 0.8,
+    label = "Spiky",
+    linestyle = :solid,
+    legend = :topright,
+    xlabel = L"z",
+    ylabel = L"f_G(z)",
+    size = (380, 280),
+)
+plot!(
+    marginal_densities_plot,
+    tts,
+    pdf.(negspiky_prior, StandardNormalSample.(tts)),
+    color = :darkblue,
+    linealpha = 0.6,
+    label = "NegSpiky",
+    linestyle = :dash,
+)
 
 savefig(prior_densities_plot, "prior_densities.tikz")
 savefig(marginal_densities_plot, "marginal_densities.tikz")
@@ -79,13 +111,17 @@ method_labels = (
     logspline = L"\textrm{Logspline}",
 )
 
+# TODO: Remove after bumping version of Empirikos.jl
+Base.broadcastable(ci::Empirikos.BiasVarianceConfidenceInterval) = Ref(ci)
+Base.broadcastable(ci::Empirikos.EBayesTarget) = Ref(ci)
+
 
 function summary_df(ci_list, prior; methods = methods, method_labels = method_labels)
     _df = DataFrame(
         target = Any[],
         t = Float64[],
-        method = Symbol[],
-        method_label = AbstractString[],
+        method = Any[],
+        method_label = Any[],
         cover = Bool[],
         ground_truth = Float64[],
         lower = Float64[],
@@ -97,7 +133,7 @@ function summary_df(ci_list, prior; methods = methods, method_labels = method_la
     for (i, ci) in enumerate(ci_list)
         for method in methods
             ci_method = ci[method]
-            if !isa(ci_method, Exception)
+            if !isa(ci_method, Exception) && !any(isnan.(getproperty.(ci_method, :lower)))
                 lower = getproperty.(ci_method, :lower)
                 upper = getproperty.(ci_method, :upper)
                 _targets = getproperty.(ci_method, :target)
@@ -267,21 +303,24 @@ spiky_lfsr_df = summary_df(spiky_lfsr, spiky_prior)
 negspiky_lfsr_df = summary_df(negspiky_lfsr, negspiky_prior)
 
 
-spiky_postmean_locmix = simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix=false)
+spiky_postmean_locmix =
+    simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = false)
 spiky_postmean_locmix[1]
 spiky_postmean_locmix[2]
 
 savefig(spiky_postmean_locmix[1], "spiky_postmean_locmix_intervals.tikz")
 savefig(spiky_postmean_locmix[2], "spiky_postmean_locmix_coverage.tikz")
 
-spiky_postmean_scalemix = simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix=true)
+spiky_postmean_scalemix =
+    simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = true)
 spiky_postmean_scalemix[1]
 spiky_postmean_scalemix[2]
 
 savefig(spiky_postmean_scalemix[1], "spiky_postmean_scalemix_intervals.tikz")
 savefig(spiky_postmean_scalemix[2], "spiky_postmean_scalemix_coverage.tikz")
 
-negspiky_postmean_locmix = simulation_plots(negspiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix=false)
+negspiky_postmean_locmix =
+    simulation_plots(negspiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = false)
 
 negspiky_postmean_locmix[1]
 negspiky_postmean_locmix[2]
@@ -290,7 +329,8 @@ savefig(negspiky_postmean_locmix[1], "negspiky_postmean_locmix_intervals.tikz")
 savefig(negspiky_postmean_locmix[2], "negspiky_postmean_locmix_coverage.tikz")
 
 
-spiky_lfsr_locmix = simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix=false)
+spiky_lfsr_locmix =
+    simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix = false)
 spiky_lfsr_locmix[1]
 spiky_lfsr_locmix[2]
 
@@ -298,7 +338,8 @@ savefig(spiky_lfsr_locmix[1], "spiky_lfsr_locmix_intervals.tikz")
 savefig(spiky_lfsr_locmix[2], "spiky_lfsr_locmix_coverage.tikz")
 
 
-spiky_lfsr_scalemix = simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix=true)
+spiky_lfsr_scalemix =
+    simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix = true)
 spiky_lfsr_scalemix[1]
 spiky_lfsr_scalemix[2]
 
@@ -306,10 +347,80 @@ savefig(spiky_lfsr_scalemix[1], "spiky_lfsr_scalemix_intervals.tikz")
 savefig(spiky_lfsr_scalemix[2], "spiky_lfsr_scalemix_coverage.tikz")
 
 
-negspiky_lfsr_locmix = simulation_plots(negspiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix=false)
+negspiky_lfsr_locmix = simulation_plots(
+    negspiky_lfsr_df,
+    _ylabel = L"\PP{\mu \geq 0 \mid Z=z}",
+    scalemix = false,
+)
 
 negspiky_lfsr_locmix[1]
 negspiky_lfsr_locmix[2]
 
 savefig(negspiky_lfsr_locmix[1], "negspiky_lfsr_locmix_intervals.tikz")
 savefig(negspiky_lfsr_locmix[2], "negspiky_lfsr_locmix_coverage.tikz")
+
+
+varying_dof = load("simulation_expfamily.jld2", "ci_list")
+
+methods_exp = collect(2:13)
+
+method_labels_exp = Dict(methods_exp .=> string.(methods_exp))
+
+varying_dof_df =
+    summary_df(
+        varying_dof,
+        negspiky_prior;
+        methods = methods_exp,
+        method_labels = method_labels_exp,
+    ) |> u -> filter(:method => <(13), u)
+
+negspiky_dof_filter =
+    filter(:method => !=(:logspline), filter(:t => ==(2.0), negspiky_lfsr_df))
+
+
+varying_dof_plot = @df negspiky_dof_filter plot(
+    :ci_length_mean,
+    :cover_mean,
+    group = :method_label,
+    seriestype = :scatter,
+    marker = [:utriangle :rtriangle :ltriangle],
+    markersize = 10, # color="#CD5496",
+    color = [:darkorange :black :blue],
+    alpha = 0.5,
+    markerstrokealpha = 0.7,
+    size = (550, 300),
+    ylim = (-0.1, 1.1),
+    xlim = (0.05, 0.6),
+    markerstrokewidth = 1.3,
+)
+plot!(
+    varying_dof_plot,
+    varying_dof_df.ci_length_mean,
+    varying_dof_df.cover_mean,
+    seriestype = :scatter,
+    markersize = 10,
+    label = "Logspline",
+    color = :darkblue,
+    bg_legend = :transparent,
+    fg_legend = :transparent,
+    alpha = range(0.2, 0.5, length = 14),
+    markerstrokealpha = 0.7,
+    markerstrokecolor = :black,
+    markerstrokewidth = 1.3,
+    xlabel = "Expected CI length",
+    ylabel = "Coverage",
+)
+
+
+annotate!(
+    varying_dof_plot,
+    varying_dof_df.ci_length_mean,
+    varying_dof_df.cover_mean,
+    text.(varying_dof_df.method_label, 13),
+    alpha = 0.6,
+    color = :black,
+)
+
+hline!(varying_dof_plot, [0.95], color = :lightgrey, linestyle = :dash, label = "")
+
+savefig(varying_dof_plot, "varying_dof_plot.tikz")
