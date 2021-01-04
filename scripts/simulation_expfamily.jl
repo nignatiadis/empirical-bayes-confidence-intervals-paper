@@ -22,8 +22,7 @@ marginal = marginalize(StandardNormalSample(), prior)
 
 target = Empirikos.PosteriorProbability.(StandardNormalSample.(2.0), Interval(0,nothing))
 
-# Posterior Mean
-nreps = 2
+nreps = 400
 ci_list = Vector{Any}(undef, nreps)
 
 rnglock = ReentrantLock()
@@ -38,7 +37,7 @@ Threads.@threads for i in Base.OneTo(nreps)
 
     ci_list[i] = Dict{Int, Any}()
 
-    for df=2:15
+    for df=2:13
         @show df
         ef = ExponentialFamily(basemeasure = Uniform(-4.0,4.0), df = df)
         ef_method = SpecialExponentialFamilies.PenalizedMLE(ef=ef; c0=0.001)
@@ -47,4 +46,4 @@ Threads.@threads for i in Base.OneTo(nreps)
 end
 
 
-JLD2.@save "expfamily_sensitivity.jld2" ci_list
+JLD2.@save "simulation_expfamily.jld2" ci_list
