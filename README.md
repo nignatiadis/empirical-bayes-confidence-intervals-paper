@@ -11,7 +11,7 @@ All computations were run on [Julia](https://julialang.org/) version 1.5.1 and [
 ## File description
 
 * **Setup:** `Manifest.toml` and `Project.toml`, specifications of Julia packages used.
-* **Real data examples:** `data_lord_cressie.jl`, `data_prostate.jl` and `data_bichsel.jl` reproduce the three real data examples of the paper (Figure 1, Figure2 and Table 2)
+* **Real data examples:** `data_lord_cressie.jl`, `data_prostate.jl` and `data_bichsel.jl` reproduce the three real data examples of the paper (Figure 1, Figure2 and Table 2). These examples have been implemented as [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks.
 * **Simulations:**
   * `simulation_ebci.jl`: Main script for running simulations. It can be called for example as `julia -t 10 simulation_ebci.jl postmean negspiky` where 10 is the number of threads. See the `_simulation_*.sbatch` files for all the calls of this script reported in the manuscript.
   * `simulation_expfamily.jl`: Script to run simulations with Logspline and varying degrees of freedom.
