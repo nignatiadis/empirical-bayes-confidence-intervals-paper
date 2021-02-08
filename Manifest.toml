@@ -42,6 +42,11 @@ git-tree-sha1 = "fc6ecd331a99da7e73880bdcd3b78a2646afe1d8"
 uuid = "f8fcb915-6b99-5be2-b79a-d6dbef8e6e7e"
 version = "0.2.1"
 
+[[ArgCheck]]
+git-tree-sha1 = "dedbbb2ddb876f899585c4ec4433265e3017215a"
+uuid = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+version = "2.1.0"
+
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays"]
 git-tree-sha1 = "0d8011f20f1e5e4b708ddd75aeba28cb566a7486"
@@ -417,6 +422,12 @@ deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "Stats
 git-tree-sha1 = "09aeec87bdc9c1fa70d0b508dfa94a21acd280d9"
 uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.2"
+
+[[LaTeXTabulars]]
+deps = ["ArgCheck", "DocStringExtensions", "Parameters"]
+git-tree-sha1 = "e19c49a2b18b8e98588f666a06bea0c5d3e7b0a6"
+uuid = "266f59ce-6e72-579c-98bb-27b39b5c037e"
+version = "0.1.1"
 
 [[LazyArrays]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "MacroTools", "MatrixFactorizations", "SparseArrays", "StaticArrays"]
