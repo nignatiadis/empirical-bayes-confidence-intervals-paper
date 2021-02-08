@@ -6,10 +6,16 @@ A repository for reproducing the numerical results in the following preprint:
 
 See [Empirikos.jl](https://github.com/nignatiadis/Empirikos.jl) for the Julia package implementing the proposed method.
 
-All computations were run on [Julia](https://julialang.org/) version 1.5 and [Mosek](https://www.mosek.com/) version 9.2. See `Manifest.toml` for specifications of all Julia packages used (in particular note that the `Empirikos.jl` interface has changed in its latest release). 
+All computations were run on [Julia](https://julialang.org/) version 1.5.1 and [Mosek](https://www.mosek.com/) version 9.2. See `Manifest.toml` for specifications of all Julia packages used (in particular note that the `Empirikos.jl` interface has changed in its latest release). 
 
 ## File description
 
+* *Setup:* `Manifest.toml` and `Project.toml`, specifications of Julia packages used.
+* *Real data examples:* `data_lord_cressie.jl`, `data_prostate.jl` and `data_bichsel.jl` reproduce the three real data examples of the paper (Figure 1, Figure2 and Table 2)
+* *Simulations:*
+  * `simulation_ebci.jl`: Main script for running simulations. It can be called for example as `julia -t 10 simulation_ebci.jl postmean negspiky` where 10 is the number of threads. See the `_simulation_*.sbatch` files for all the calls of this script reported in the manuscript.
+  * `simulation_expfamily.jl`: Script to run simulations with Logspline and varying degrees of freedom.
+  * `simulation_plots.jl`: Takes the output of the simulation scripts above and generates Figures 3-7 of the paper .
 
 ## Repository history
 
