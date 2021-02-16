@@ -2,7 +2,7 @@
 
 A repository for reproducing the numerical results in the following preprint:
 
-  >Ignatiadis, Nikolaos, and Stefan Wager. "Bias-Aware Confidence Intervals for Empirical Bayes Analysis." [arXiv:1902.02774](https://arxiv.org/abs/1902.02774) (2019)
+  >Ignatiadis, Nikolaos, and Stefan Wager. "Confidence Intervals for Nonparametric Empirical Bayes Analysis." [arXiv:1902.02774](https://arxiv.org/abs/1902.02774) (2019)
 
 See [Empirikos.jl](https://github.com/nignatiadis/Empirikos.jl) for the Julia package implementing the proposed method.
 
