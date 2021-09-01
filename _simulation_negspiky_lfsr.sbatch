@@ -7,7 +7,7 @@
 #SBATCH --partition=stat,hns,normal
 
 # load modules 
-ml load julia/1.5.1
+ml load julia/1.6.2
 
 # execute script
 julia -t 15 simulation_ebci.jl lfsr negspiky
