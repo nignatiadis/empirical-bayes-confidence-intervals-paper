@@ -10,14 +10,9 @@ using Random
 
 prior = MixtureModel([ Normal(-0.25,.25), Normal(0,1.0)],[0.8, 0.2])
 
-
-
 n = 5_000
 
 marginal = marginalize(StandardNormalSample(), prior)
-
-
-
 
 
 target = Empirikos.PosteriorProbability.(StandardNormalSample.(2.0), Interval(0,nothing))
