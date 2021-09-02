@@ -2,11 +2,10 @@
 
 A repository for reproducing the numerical results in the following preprint:
 
-  >Ignatiadis, Nikolaos, and Stefan Wager. "Confidence Intervals for Nonparametric Empirical Bayes Analysis." [arXiv:1902.02774](https://arxiv.org/abs/1902.02774) (2019)
+  >Ignatiadis, Nikolaos, and Stefan Wager. "Confidence Intervals for Nonparametric Empirical Bayes Analysis." [arXiv:1902.02774](https://arxiv.org/abs/1902.02774) (2019+)
 
 See [Empirikos.jl](https://github.com/nignatiadis/Empirikos.jl) for the Julia package implementing the proposed method.
 
-All computations were run on [Julia](https://julialang.org/) version 1.6.1 and [Mosek](https://www.mosek.com/) version 9.2. See `Manifest.toml` for specifications of all Julia packages used.
 
 ## File description
 
@@ -16,8 +15,18 @@ All computations were run on [Julia](https://julialang.org/) version 1.6.1 and [
   * `simulation_ebci.jl`: Main script for running simulations. It can be called for example as `julia -t 10 simulation_ebci.jl postmean negspiky` where 10 is the number of threads. See the `_simulation_*.sbatch` files for all the calls of this script reported in the manuscript.
   * `simulation_expfamily.jl`: Script to run simulations with Logspline and varying degrees of freedom.
   * `simulation_plots.jl`: Takes the output of the simulation scripts above and generates Figures 3-7 of the paper .
-* **Other:**
-  * `asymptotic_ci_length.jl`
+  * `asymptotic_ci_length.jl`: Code for Figure 8 of the paper.
+
+## Requirements and version-info for reproduction
+
+* The [Mosek](https://www.mosek.com/) convex programming solver, version 9.2, was used in the simulations. Mosek requires a license (there is an option for a free academic license).
+* [Julia](https://julialang.org/) version 1.6.2.
+* All required Julia packages and their versions are specified in `Project.toml` and `Manifest.toml`. They may be installed automatically by starting a Julia session in this folder and typing:
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
 
 ## Repository history
 

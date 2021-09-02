@@ -1,14 +1,19 @@
+using Pkg
+Pkg.activate(".")
+
 using JLD2
 using Empirikos
+using CategoricalArrays
 using DataFrames
 using LaTeXStrings
 using StatsPlots
 using SpecialExponentialFamilies
 using FileIO
+using Test
 
 begin
     pgfplotsx()
-    deleteat!(PGFPlotsX.CUSTOM_PREAMBLE, Base.OneTo(length(PGFPlotsX.CUSTOM_PREAMBLE)))
+    empty!(PGFPlotsX.CUSTOM_PREAMBLE)
     push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepackage{amssymb}")
     push!(
         PGFPlotsX.CUSTOM_PREAMBLE,
@@ -20,18 +25,16 @@ begin
     )
 end
 
-# ╔═╡ 17be2c0c-4bf5-11eb-25ca-cfe4e5fb5485
 theme(
     :default;
     background_color_legend = :transparent,
     foreground_color_legend = :transparent,
     grid = nothing,
     frame = :box,
+    legendfonthalign = :left,
     thickness_scaling = 1.3,
     size = (420, 330),
 )
-
-
 
 
 spiky_prior = Empirikos.AshPriors[:Spiky]
@@ -85,44 +88,42 @@ plot!(
 savefig(prior_densities_plot, "prior_densities.tikz")
 savefig(marginal_densities_plot, "marginal_densities.tikz")
 
-negspiky_lfsr = load("negspiky_lfsr.jld2", "ci_list")
-spiky_lfsr = load("spiky_lfsr.jld2", "ci_list")
-negspiky_postmean = load("negspiky_postmean.jld2", "ci_list")
-spiky_postmean = load("spiky_postmean.jld2", "ci_list")
+negspiky_lfsr = load("negspiky_lfsr.jld2", "ci_list");
+spiky_lfsr = load("spiky_lfsr.jld2", "ci_list");
+negspiky_postmean = load("negspiky_postmean.jld2", "ci_list");
+spiky_postmean = load("spiky_postmean.jld2", "ci_list");
 
 
-methods = [
+methods_list = [
     :dkw_scalemix
     :kde_scalemix
-    :lam_scalemix
+    :amari_scalemix
     :dkw_locmix
     :kde_locmix
-    :lam_locmix
+    :amari_locmix
     :logspline
 ]
 
 method_labels = (
+    kde_scalemix = L"\textrm{Gauss-F-Loc } (\mathcal{S}\mathcal{N})",
+    kde_locmix = L"\textrm{Gauss-F-Loc } (\mathcal{L}\mathcal{N})",
     dkw_scalemix = L"\textrm{DKW-F-Loc } (\mathcal{S}\mathcal{N})",
     dkw_locmix = L"\textrm{DKW-F-Loc } (\mathcal{L}\mathcal{N})",
-    kde_scalemix = L"\textrm{KDE-F-Loc } (\mathcal{S}\mathcal{N})",
-    kde_locmix = L"\textrm{KDE-F-Loc } (\mathcal{L}\mathcal{N})",
-    lam_scalemix = L"\textrm{Amari } (\mathcal{S}\mathcal{N})",
-    lam_locmix = L"\textrm{Amari } (\mathcal{L}\mathcal{N})",
+    amari_scalemix = L"\textrm{AMARI } (\mathcal{S}\mathcal{N})",
+    amari_locmix = L"\textrm{AMARI } (\mathcal{L}\mathcal{N})",
     logspline = L"\textrm{Logspline}",
 )
 
-# TODO: Remove after bumping version of Empirikos.jl
-Base.broadcastable(ci::Empirikos.BiasVarianceConfidenceInterval) = Ref(ci)
-Base.broadcastable(ci::Empirikos.EBayesTarget) = Ref(ci)
 
 
-function summary_df(ci_list, prior; methods = methods, method_labels = method_labels)
+function summary_df(ci_list, prior; methods_list = methods_list, method_labels = method_labels)
     _df = DataFrame(
         target = Any[],
         t = Float64[],
         method = Any[],
         method_label = Any[],
         cover = Bool[],
+        simultaneous_cover = Bool[],
         ground_truth = Float64[],
         lower = Float64[],
         upper = Float64[],
@@ -131,7 +132,7 @@ function summary_df(ci_list, prior; methods = methods, method_labels = method_la
     )
 
     for (i, ci) in enumerate(ci_list)
-        for method in methods
+        for method in methods_list
             ci_method = ci[method]
             if !isa(ci_method, Exception) && !any(isnan.(getproperty.(ci_method, :lower)))
                 lower = getproperty.(ci_method, :lower)
@@ -140,11 +141,13 @@ function summary_df(ci_list, prior; methods = methods, method_labels = method_la
                 _ts = response.(location.(_targets))
                 ground_truth = _targets.(prior)
                 cover = lower .- 1e-6 .<= ground_truth .<= upper .+ 1e-6
+                simultaneous_cover = all(cover)
                 ci_length = upper .- lower
                 append!(
                     _df,
                     DataFrame(
                         cover = cover,
+                        simultaneous_cover = simultaneous_cover,
                         lower = lower,
                         upper = upper,
                         ci_length = ci_length,
@@ -161,23 +164,28 @@ function summary_df(ci_list, prior; methods = methods, method_labels = method_la
     end
 
     gdf = groupby(_df, [:target; :t; :method; :method_label])
-    combined_gdf = combine(gdf, valuecols(gdf) .=> mean, nrow)
+    combined_gdf = combine(gdf, valuecols(gdf) .=> mean,
+        valuecols(gdf) .=> z->length(unique(z)),
+        nrow)
     combined_gdf = transform(
         combined_gdf,
         [:lower_mean, :upper_mean] =>
             ByRow((l, u) -> Empirikos.LowerUpperConfidenceInterval(lower = l, upper = u)) => :ci,
     )
+    combined_gdf[!, :method_label] =  categorical(combined_gdf.method_label)
+    levels!(combined_gdf.method_label, collect(values(method_labels)))
     combined_gdf
 end
 
-function simulation_plots(_df; _ylabel = "bla", scalemix = false)
+function simulation_plots(_df; _ylabel = "placeholder", scalemix = false)
 
-    method_colors = [:blue :darkorange :black :darkred]
-    method_alphas = [0.4 0.5 0.9 0.8]
-    method_linestyle = [:solid :solid :dash :dot]
+    # Gauss-F-Loc, DKW-F-Loc, AMARI, logspline
+    method_colors = [:darkorange :black :blue :darkred]
+    method_alphas = [0.7 0.9 0.4 0.8]
+    method_linestyle = [:solid :dash :solid  :dot]
 
-    methods_locmix = [:logspline, :dkw_locmix, :kde_locmix, :lam_locmix]
-    methods_scalemix = [:dkw_scalemix, :kde_scalemix, :lam_scalemix]
+    methods_locmix = [:logspline, :dkw_locmix, :kde_locmix, :amari_locmix]
+    methods_scalemix = [:dkw_scalemix, :kde_scalemix, :amari_scalemix]
 
     if !scalemix
         _plot1 = @df filter(:method => ==(:kde_locmix), _df) plot(
@@ -198,11 +206,11 @@ function simulation_plots(_df; _ylabel = "bla", scalemix = false)
             alpha = 0.9,
             color = :black,
         )
-        @df filter(:method => ==(:lam_locmix), _df) plot!(
+        @df filter(:method => ==(:amari_locmix), _df) plot!(
             _plot1,
             :t,
             :ci,
-            label = method_labels.lam_locmix,
+            label = method_labels.amari_locmix,
             show_ribbon = true,
             fillcolor = :blue,
             fillalpha = 0.4,
@@ -211,13 +219,13 @@ function simulation_plots(_df; _ylabel = "bla", scalemix = false)
             _plot1,
             :t,
             :ci,
-            label = "Logspline",
+            label = method_labels.logspline,
             show_ribbon = false,
             linealpha = 1.0,
             linecolor = :darkred,
             linestyle = :dot,
         )
-        @df filter(:method => ==(:lam_locmix), _df) plot!(
+        @df filter(:method => ==(:amari_locmix), _df) plot!(
             _plot1,
             :t,
             :ground_truth_mean,
@@ -260,24 +268,22 @@ function simulation_plots(_df; _ylabel = "bla", scalemix = false)
             alpha = 0.9,
             color = :black,
         )
-        @df filter(:method => ==(:lam_scalemix), _df) plot!(
+        @df filter(:method => ==(:amari_scalemix), _df) plot!(
             _plot2,
             :t,
             :ci,
-            label = method_labels.lam_scalemix,
+            label = method_labels.amari_scalemix,
             show_ribbon = true,
             fillcolor = :blue,
             fillalpha = 0.4,
         )
-        @df filter(:method => ==(:lam_scalemix), _df) plot!(
+        @df filter(:method => ==(:amari_scalemix), _df) plot!(
             _plot2,
             :t,
             :ground_truth_mean,
             label = "Ground truth",
             color = :black,
         )
-
-
 
         _plot4 = @df filter(:method => in(methods_scalemix), _df) plot(
             :t,
@@ -302,22 +308,22 @@ negspiky_postmean_df = summary_df(negspiky_postmean, negspiky_prior)
 spiky_lfsr_df = summary_df(spiky_lfsr, spiky_prior)
 negspiky_lfsr_df = summary_df(negspiky_lfsr, negspiky_prior)
 
+# sanity checks
+@test nrow(spiky_postmean_df) == 31*length(methods_list)
+@test nrow(spiky_lfsr_df) == 31*length(methods_list)
+@test nrow(negspiky_postmean_df) == 31*(length(methods_list)-3)
+@test nrow(negspiky_lfsr_df) == 31*(length(methods_list)-3)
+#
+
+# Figure 4
 
 spiky_postmean_locmix =
     simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = false)
 spiky_postmean_locmix[1]
 spiky_postmean_locmix[2]
 
-savefig(spiky_postmean_locmix[1], "spiky_postmean_locmix_intervals.tikz")
-savefig(spiky_postmean_locmix[2], "spiky_postmean_locmix_coverage.tikz")
-
-spiky_postmean_scalemix =
-    simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = true)
-spiky_postmean_scalemix[1]
-spiky_postmean_scalemix[2]
-
-savefig(spiky_postmean_scalemix[1], "spiky_postmean_scalemix_intervals.tikz")
-savefig(spiky_postmean_scalemix[2], "spiky_postmean_scalemix_coverage.tikz")
+savefig(spiky_postmean_locmix[1], "spiky_postmean_locmix_intervals.tikz") #a)
+savefig(spiky_postmean_locmix[2], "spiky_postmean_locmix_coverage.tikz")  #b)
 
 negspiky_postmean_locmix =
     simulation_plots(negspiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = false)
@@ -325,26 +331,18 @@ negspiky_postmean_locmix =
 negspiky_postmean_locmix[1]
 negspiky_postmean_locmix[2]
 
-savefig(negspiky_postmean_locmix[1], "negspiky_postmean_locmix_intervals.tikz")
-savefig(negspiky_postmean_locmix[2], "negspiky_postmean_locmix_coverage.tikz")
+savefig(negspiky_postmean_locmix[1], "negspiky_postmean_locmix_intervals.tikz") #c)
+savefig(negspiky_postmean_locmix[2], "negspiky_postmean_locmix_coverage.tikz") #d)
 
+# Figure 5
 
 spiky_lfsr_locmix =
     simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix = false)
 spiky_lfsr_locmix[1]
 spiky_lfsr_locmix[2]
 
-savefig(spiky_lfsr_locmix[1], "spiky_lfsr_locmix_intervals.tikz")
-savefig(spiky_lfsr_locmix[2], "spiky_lfsr_locmix_coverage.tikz")
-
-
-spiky_lfsr_scalemix =
-    simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix = true)
-spiky_lfsr_scalemix[1]
-spiky_lfsr_scalemix[2]
-
-savefig(spiky_lfsr_scalemix[1], "spiky_lfsr_scalemix_intervals.tikz")
-savefig(spiky_lfsr_scalemix[2], "spiky_lfsr_scalemix_coverage.tikz")
+savefig(spiky_lfsr_locmix[1], "spiky_lfsr_locmix_intervals.tikz") #a)
+savefig(spiky_lfsr_locmix[2], "spiky_lfsr_locmix_coverage.tikz")  # b)
 
 
 negspiky_lfsr_locmix = simulation_plots(
@@ -356,8 +354,34 @@ negspiky_lfsr_locmix = simulation_plots(
 negspiky_lfsr_locmix[1]
 negspiky_lfsr_locmix[2]
 
-savefig(negspiky_lfsr_locmix[1], "negspiky_lfsr_locmix_intervals.tikz")
-savefig(negspiky_lfsr_locmix[2], "negspiky_lfsr_locmix_coverage.tikz")
+savefig(negspiky_lfsr_locmix[1], "negspiky_lfsr_locmix_intervals.tikz") #c)
+savefig(negspiky_lfsr_locmix[2], "negspiky_lfsr_locmix_coverage.tikz")  #d)
+
+
+
+# Figure 6
+
+
+
+spiky_postmean_scalemix =
+    simulation_plots(spiky_postmean_df, _ylabel = L"\EE{\mu \mid Z=z}", scalemix = true)
+spiky_postmean_scalemix[1]
+spiky_postmean_scalemix[2]
+
+savefig(spiky_postmean_scalemix[1], "spiky_postmean_scalemix_intervals.tikz") #a)
+savefig(spiky_postmean_scalemix[2], "spiky_postmean_scalemix_coverage.tikz")  #b)
+
+
+
+spiky_lfsr_scalemix =
+    simulation_plots(spiky_lfsr_df, _ylabel = L"\PP{\mu \geq 0 \mid Z=z}", scalemix = true)
+spiky_lfsr_scalemix[1]
+spiky_lfsr_scalemix[2]
+
+savefig(spiky_lfsr_scalemix[1], "spiky_lfsr_scalemix_intervals.tikz") # c)
+savefig(spiky_lfsr_scalemix[2], "spiky_lfsr_scalemix_coverage.tikz")  # d)
+
+
 
 
 varying_dof = load("simulation_expfamily.jld2", "ci_list")
@@ -370,12 +394,22 @@ varying_dof_df =
     summary_df(
         varying_dof,
         negspiky_prior;
-        methods = methods_exp,
+        methods_list = methods_exp,
         method_labels = method_labels_exp,
     ) |> u -> filter(:method => <(13), u)
 
+# sanity check
+
+sim_ebci_5 = filter(:method => ==(:logspline), filter(:t => ==(2.0), negspiky_lfsr_df))
+sim_expfam_5 = filter(:method => ==(5), varying_dof_df)
+@test sim_expfam_5.cover_mean ≈ sim_ebci_5.cover_mean
+@test sim_expfam_5.ci_length_mean ≈ sim_ebci_5.ci_length_mean
+
+
 negspiky_dof_filter =
     filter(:method => !=(:logspline), filter(:t => ==(2.0), negspiky_lfsr_df))
+
+
 
 
 varying_dof_plot = @df negspiky_dof_filter plot(
@@ -384,7 +418,7 @@ varying_dof_plot = @df negspiky_dof_filter plot(
     group = :method_label,
     seriestype = :scatter,
     marker = [:utriangle :rtriangle :ltriangle],
-    markersize = 10, # color="#CD5496",
+    markersize = 10,
     color = [:darkorange :black :blue],
     alpha = 0.5,
     markerstrokealpha = 0.7,
@@ -393,6 +427,7 @@ varying_dof_plot = @df negspiky_dof_filter plot(
     xlim = (0.05, 0.6),
     markerstrokewidth = 1.3,
 )
+
 plot!(
     varying_dof_plot,
     varying_dof_df.ci_length_mean,
@@ -403,7 +438,7 @@ plot!(
     color = :darkblue,
     bg_legend = :transparent,
     fg_legend = :transparent,
-    alpha = range(0.2, 0.5, length = 14),
+    alpha = range(0.2, 0.5, length = 11),
     markerstrokealpha = 0.7,
     markerstrokecolor = :black,
     markerstrokewidth = 1.3,
