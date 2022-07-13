@@ -1,11 +1,14 @@
 # empirical-bayes-confidence-intervals-paper
 
-A repository for reproducing the numerical results in the following preprint:
+A repository for reproducing the numerical results in the following [paper](https://www.tandfonline.com/doi/abs/10.1080/01621459.2021.2008403):
 
-  >Ignatiadis, Nikolaos, and Stefan Wager. "Confidence Intervals for Nonparametric Empirical Bayes Analysis." [arXiv:1902.02774](https://arxiv.org/abs/1902.02774) (2019+)
+  >Ignatiadis, Nikolaos, and Stefan Wager. "Confidence Intervals for Nonparametric Empirical Bayes Analysis." Journal of the American Statistical Association: Theory and Methods (2022)
+
+A preprint is also available at [arXiv:1902.02774](https://arxiv.org/abs/1902.02774).
 
 See [Empirikos.jl](https://github.com/nignatiadis/Empirikos.jl) for the Julia package implementing the proposed method.
 
+Please see the `rejoinder' folder for code reproducing the rejoinder for the JASA discussion of the above paper.
 
 ## File description
 
